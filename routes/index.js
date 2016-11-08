@@ -52,7 +52,7 @@ var getAddr = function(req, res){
 
   addrFind.lean(true).sort('-blockNumber').skip(start).limit(limit)
           .exec("find", function (err, docs) {
-            if (docs.length)
+            if (docs)
               data.data = filters.filterTX(docs, addr);      
             else 
               data.data = [];
@@ -138,7 +138,7 @@ var getInternalTx = function(req, res){
                   });
     }, function(cb) {
       txFind.exec("find", function (err, docs) {
-        if (docs.length)
+        if (docs)
           data.data = filters.internalTX(docs);      
         else 
           data.data = [];
