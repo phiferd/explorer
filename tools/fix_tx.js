@@ -31,8 +31,8 @@ var getTx = function() {
                        process.exit(9);
                    }
                 } else {
-                    console.log('DB successfully written for block ' +
-                        tx.length.toString() );
+                    //console.log('DB successfully written for block ' +
+                    //    tx.length.toString() );
 
                 }
                 bulkOps = [];

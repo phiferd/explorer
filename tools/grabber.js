@@ -118,6 +118,7 @@ var grabBlock = function(config, web3, blockHashOrNumber) {
 
 var writeBlockToDB = function(config, blockData) {
     //var blockContents = JSON.stringify(blockData, null, 4);
+    //console.log('block information:'+ JSON.stringify(blockData))
     return new Block(blockData).save( function( err, block, count ){
         if ( typeof err !== 'undefined' && err ) {
             if (err.code == 11000) {
