@@ -9,7 +9,6 @@ var Block = new Schema(
     "nonce": String,
     "sha3Uncles": String,
     "logsBloom": String,
-    "transactions":[{blockHash:String, blockNumber: Number, from:String, gas: Number, gasPrice: Number, hash:String, input:String, nounce: Number, to:String, transactionIndex:Number, value:String}],
     "transactionsRoot": String,
     "stateRoot": String,
     "receiptRoot": String,
