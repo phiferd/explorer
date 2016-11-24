@@ -2,6 +2,8 @@ var mongoose = require( 'mongoose' );
 require( '../db-internal.js' );
 var Block     = mongoose.model( 'Block' );
 var InternalTx     = mongoose.model( 'InternalTransaction' );
+var Transaction     = mongoose.model( 'Transaction' );
+
 var filters = require('./filters')
 
 
@@ -16,9 +18,9 @@ module.exports = function(app){
   var fiat = require('./fiat');
   var stats = require('./stats');
 
-  /* 
+  /*
     Local DB: data request format
-    { "address": "0x1234blah", "txin": true } 
+    { "address": "0x1234blah", "txin": true }
     { "tx": "0x1234blah" }
     { "block": "1234" }
   */
@@ -34,7 +36,7 @@ module.exports = function(app){
 
   app.post('/fiat', fiat);
   app.post('/stats', stats);
-  
+
 
 }
 
@@ -48,20 +50,20 @@ var getAddr = function(req, res){
 
   var data = { draw: parseInt(req.body.draw), recordsFiltered: count, recordsTotal: count };
 
-  var addrFind = InternalTx.find( { $or: [{"action.to": addr}, {"action.from": addr}] })  
+  var addrFind = InternalTx.find( { $or: [{"action.to": addr}, {"action.from": addr}] })
 
   addrFind.lean(true).sort('-blockNumber').skip(start).limit(limit)
           .exec("find", function (err, docs) {
-            if (docs.length)
-              data.data = filters.filterTX(docs, addr);      
-            else 
+            if (docs)
+              data.data = filters.filterTX(docs, addr);
+            else
               data.data = [];
             res.write(JSON.stringify(data));
             res.end();
           });
 
 };
- 
+
 
 
 var getBlock = function(req, res) {
@@ -88,8 +90,9 @@ var getBlock = function(req, res) {
 var getTx = function(req, res){
 
   var tx = req.body.tx.toLowerCase();
+  console.log("findinging: " +tx)
 
-  var txFind = Block.findOne( { "transactions.hash" : tx }, "transactions timestamp")
+  var txFind = Transaction.findOne( { "hash" : tx }, "hash value blockNumber timestamp gas gashprice nounce from to")
                   .lean(true);
   txFind.exec(function (err, doc) {
     if (!doc){
@@ -98,8 +101,9 @@ var getTx = function(req, res){
       res.end();
     } else {
       // filter transactions
-      var txDocs = filters.filterBlock(doc, "hash", tx)
-      res.write(JSON.stringify(txDocs));
+      //var txDocs = filters.filterBlock(doc, "hash", tx)
+      console.log("result" + JSON.stringify(doc));
+      res.write(JSON.stringify(doc));
       res.end();
     }
   });
@@ -117,30 +121,30 @@ var getInternalTx = function(req, res){
   var data = { draw: parseInt(req.body.draw) };
 
 
-  var txFind = InternalTx.find( { "action.callType" : "call", 
+  var txFind = InternalTx.find( { "action.callType" : "call",
                   $or: [{"action.from": addr}, {"action.to": addr}] }, "action transactionHash blockNumber timestamp")
                   .lean(true).sort('-blockNumber').skip(start).limit(limit)
 
   async.parallel([
     function(cb) {
       if (count) {
-        data.recordsFiltered = parseInt(count); 
+        data.recordsFiltered = parseInt(count);
         data.recordsTotal = parseInt(count);
         cb();
         return;
       }
-      InternalTx.find( { "action.callType" : "call", 
+      InternalTx.find( { "action.callType" : "call",
                   $or: [{"action.from": addr}, {"action.to": addr}] })
                 .count(function(err, count) {
-                    data.recordsFiltered = count; 
+                    data.recordsFiltered = count;
                     data.recordsTotal = count;
                     cb()
                   });
     }, function(cb) {
       txFind.exec("find", function (err, docs) {
-        if (docs.length)
-          data.data = filters.internalTX(docs);      
-        else 
+        if (docs)
+          data.data = filters.internalTX(docs);
+        else
           data.data = [];
         cb();
       });
@@ -170,18 +174,18 @@ var getData = function(req, res){
       var lim = MAX_ENTRIES;
     else
       var lim = parseInt(limit);
-    
+
     DATA_ACTIONS[action](lim, res);
 
   } else {
-  
+
     console.error("Invalid Request: " + action)
     res.status(400).send();
   }
 
 };
 
-/* 
+/*
   temporary blockstats here
 */
 var latestBlock = function(req, res) {
@@ -191,7 +195,7 @@ var latestBlock = function(req, res) {
     res.write(JSON.stringify(doc));
     res.end();
   });
-} 
+}
 
 
 var getLatest = function(lim, res, callback) {
@@ -213,9 +217,9 @@ var sendBlocks = function(lim, res) {
 }
 
 var sendTxs = function(lim, res) {
-  InternalTx.find({}).lean(true).sort('-blockNumber').limit(lim)
+  Transaction.find({}).lean(true).sort('-blockNumber').limit(lim)
         .exec(function (err, txs) {
-          res.write(JSON.stringify({"txs": filters.extractTX(txs)}));
+          res.write(JSON.stringify({"txs": txs}));
           res.end();
         });
 }
@@ -226,4 +230,3 @@ const DATA_ACTIONS = {
   "latest_blocks": sendBlocks,
   "latest_txs": sendTxs
 }
-

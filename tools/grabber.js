@@ -11,11 +11,11 @@ var mongoose = require( 'mongoose' );
 var Block     = mongoose.model( 'Block' );
 
 var grabBlocks = function(config) {
-    var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' + 
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' +
         config.gethPort.toString()));
 
 
-    if('listenOnly' in config && config.listenOnly === true) 
+    if('listenOnly' in config && config.listenOnly === true)
         listenBlocks(config, web3);
     else
         setTimeout(function() {
@@ -39,12 +39,13 @@ var listenBlocks = function(config, web3) {
     });
 }
 
+
 var grabBlock = function(config, web3, blockHashOrNumber) {
     var desiredBlockHashOrNumber;
 
     // check if done
     if(blockHashOrNumber == undefined) {
-        return; 
+        return;
     }
 
     if (typeof blockHashOrNumber === 'object') {
@@ -79,14 +80,14 @@ var grabBlock = function(config, web3, blockHashOrNumber) {
                 else {
                     writeBlockToDB(config, blockData);
                 }
-                if('listenOnly' in config && config.listenOnly === true) 
+                if('listenOnly' in config && config.listenOnly === true)
                     return;
 
                 if('hash' in blockData && 'number' in blockData) {
-                    // If currently working on an interval (typeof blockHashOrNumber === 'object') and 
-                    // the block number or block hash just grabbed isn't equal to the start yet: 
-                    // then grab the parent block number (<this block's number> - 1). Otherwise done 
-                    // with this interval object (or not currently working on an interval) 
+                    // If currently working on an interval (typeof blockHashOrNumber === 'object') and
+                    // the block number or block hash just grabbed isn't equal to the start yet:
+                    // then grab the parent block number (<this block's number> - 1). Otherwise done
+                    // with this interval object (or not currently working on an interval)
                     // -> so move onto the next thing in the blocks array.
                     if(typeof blockHashOrNumber === 'object' &&
                         (
@@ -121,12 +122,12 @@ var writeBlockToDB = function(config, blockData) {
     return new Block(blockData).save( function( err, block, count ){
         if ( typeof err !== 'undefined' && err ) {
             if (err.code == 11000) {
-                console.log('Skip: Duplicate key ' + 
-                blockData.number.toString() + ': ' + 
+                console.log('Skip: Duplicate key ' +
+                blockData.number.toString() + ': ' +
                 err);
             } else {
-               console.log('Error: Aborted due to error on ' + 
-                    'block number ' + blockData.number.toString() + ': ' + 
+               console.log('Error: Aborted due to error on ' +
+                    'block number ' + blockData.number.toString() + ': ' +
                     err);
                process.exit(9);
            }
@@ -134,7 +135,7 @@ var writeBlockToDB = function(config, blockData) {
             if(!('quiet' in config && config.quiet === true)) {
                 console.log('DB successfully written for block number ' +
                     blockData.number.toString() );
-            }            
+            }
         }
       });
 }
@@ -149,7 +150,7 @@ var checkBlockDBExistsThenWrite = function(config, blockData) {
         if (!b.length)
             writeBlockToDB(config, blockData);
         else {
-            console.log('Aborting because block number: ' + blockData.number.toString() + 
+            console.log('Aborting because block number: ' + blockData.number.toString() +
                 ' already exists in DB.');
             process.exit(9);
         }
@@ -161,11 +162,11 @@ var checkBlockDBExistsThenWrite = function(config, blockData) {
   Patch Missing Blocks
 */
 var patchBlocks = function(config) {
-    var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' + 
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' +
         config.gethPort.toString()));
 
     // number of blocks should equal difference in block numbers
-    var firstBlock = 0;
+    var firstBlock = 1000000;
     var lastBlock = web3.eth.blockNumber;
     blockIter(web3, firstBlock, lastBlock, config);
 }
@@ -193,11 +194,11 @@ var blockIter = function(web3, firstBlock, lastBlock, config) {
           if (c === 0) {
             grabBlock(config, web3, {'start': firstBlock, 'end': lastBlock});
           } else if (expectedBlocks > c) {
-            console.log("Missing: " + JSON.stringify(expectedBlocks - c));  
-            var midBlock = firstBlock + parseInt((lastBlock - firstBlock)/2); 
+            console.log("Missing: " + JSON.stringify(expectedBlocks - c));
+            var midBlock = firstBlock + parseInt((lastBlock - firstBlock)/2);
             blockIter(web3, firstBlock, midBlock, config);
             blockIter(web3, midBlock + 1, lastBlock, config);
-          } else 
+          } else
             return;
         })
     }
@@ -215,7 +216,7 @@ try {
 }
 catch (error) {
     if (error.code === 'ENOENT') {
-        console.log('No config file found. Using default configuration (will ' + 
+        console.log('No config file found. Using default configuration (will ' +
             'download all blocks starting from latest)');
     }
     else {
@@ -244,4 +245,4 @@ console.log('Using configuration:');
 console.log(config);
 
 grabBlocks(config);
-// patchBlocks(config);
+//patchBlocks(config);
