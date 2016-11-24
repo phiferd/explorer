@@ -9,6 +9,7 @@ var Web3 = require('web3');
 
 var mongoose = require( 'mongoose' );
 var Block     = mongoose.model( 'Block' );
+var Transaction     = mongoose.model( 'Transaction' );
 
 var grabBlocks = function(config) {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' +
@@ -39,6 +40,29 @@ var listenBlocks = function(config, web3) {
     });
 }
 
+var getTx = function(web3,desiredBlockHashOrNumber) {
+
+      if (web3.eth.getBlockTransactionCount(desiredBlockHashOrNumber) > 0) {
+        var d =0;
+        for (;d <web3.eth.getBlockTransactionCount(desiredBlockHashOrNumber);d++) {
+              var txData = web3.eth.getTransactionFromBlock(desiredBlockHashOrNumber,d);
+              txData.timestamp = web3.eth.getBlock(desiredBlockHashOrNumber).timestamp;
+              new Transaction(txData).save();
+              if ( typeof err !== 'undefined' && err ) {
+                  if (err.code == 11000) {
+                      console.log('Skip: Duplicate key ' +
+                      err);
+                  } else {
+                     console.log('Error: Aborted due to error: ' +
+                          err);
+                     process.exit(9);
+                 }
+              } else {
+              console.log('DB successfully written for tx ' + txData.hash);
+              }
+        }
+    }
+}
 
 var grabBlock = function(config, web3, blockHashOrNumber) {
     var desiredBlockHashOrNumber;
@@ -78,6 +102,7 @@ var grabBlock = function(config, web3, blockHashOrNumber) {
                     checkBlockDBExistsThenWrite(config, blockData);
                 }
                 else {
+                    getTx(web3, blockHashOrNumber);
                     writeBlockToDB(config, blockData);
                 }
                 if('listenOnly' in config && config.listenOnly === true)
@@ -246,3 +271,6 @@ console.log(config);
 
 grabBlocks(config);
 //patchBlocks(config);
+//var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:' +
+//    config.gethPort.toString()));
+//getTx(web3, 103748);

@@ -2,6 +2,8 @@ var mongoose = require( 'mongoose' );
 require( '../db-internal.js' );
 var Block     = mongoose.model( 'Block' );
 var InternalTx     = mongoose.model( 'InternalTransaction' );
+var Transaction     = mongoose.model( 'Transaction' );
+
 var filters = require('./filters')
 
 
@@ -88,8 +90,9 @@ var getBlock = function(req, res) {
 var getTx = function(req, res){
 
   var tx = req.body.tx.toLowerCase();
+  console.log("findinging: " +tx)
 
-  var txFind = InternalTx.findOne( { "transactionHash" : tx }, "action transactionHash blockNumber timestamp")
+  var txFind = Transaction.findOne( { "hash" : tx }, "hash value blockNumber timestamp gas gashprice nounce from to")
                   .lean(true);
   txFind.exec(function (err, doc) {
     if (!doc){
@@ -214,9 +217,9 @@ var sendBlocks = function(lim, res) {
 }
 
 var sendTxs = function(lim, res) {
-  InternalTx.find({}).lean(true).sort('-blockNumber').limit(lim)
+  Transaction.find({}).lean(true).sort('-blockNumber').limit(lim)
         .exec(function (err, txs) {
-          res.write(JSON.stringify({"txs": filters.extractTX(txs)}));
+          res.write(JSON.stringify({"txs": txs}));
           res.end();
         });
 }
