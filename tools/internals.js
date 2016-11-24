@@ -109,7 +109,6 @@ var getLatestBlocks = function(latest, start) {
   var count = start;
 
   setInterval(function() {
-
       grabInternalTxs(count, BATCH_SIZE);
       count += BATCH_SIZE;
       if (count > latest)
@@ -130,7 +129,6 @@ setInterval(function() {
           .exec(function(err, doc) {
             var last = doc.blockNumber;
             var latest = web3.eth.blockNumber;
-
             getLatestBlocks(latest, last);
           });
   } catch (e) {

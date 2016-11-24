@@ -1,4 +1,5 @@
 require( '../db.js' );
+require('../db-internal.js')
 
 var express = require('express');
 var app = express();
@@ -6,11 +7,13 @@ var app = express();
 var fs = require('fs');
 
 var Web3 = require('web3');
+var http = require('http');
+
 
 var mongoose = require( 'mongoose' );
-var Block     = mongoose.model( 'Block' );
-var Transaction     = mongoose.model( 'Transaction' );
-var InternalTx     = mongoose.model( 'InternalTransaction' );
+var Block       = mongoose.model( 'Block' );
+var Transaction = mongoose.model( 'Transaction' );
+var InternalTx  = mongoose.model( 'InternalTransaction' );
 
 
 var grabBlocks = function(config) {
@@ -66,15 +69,17 @@ var getTx = function(web3,desiredBlockHashOrNumber) {
     }
 }
 
-function grabInternalTxs(batchNum, batchSize) {
-  var fromBlock = web3.toHex(batchNum);
-  var toBlock = web3.toHex(batchNum + batchSize - 1);
+function grabInternalTxs(web3, blockHashOrNumber) {
+
+  console.log("\n Here comeing itx : ");
+  var fromBlock = web3.toHex(web3.eth.getBlock(blockHashOrNumber).number);
+  var toBlock = fromBlock;
+  var id = web3.eth.getBlock(blockHashOrNumber).number;
   var post_data = '{ \
     "jsonrpc":"2.0", \
     "method":"trace_filter", \
-    "params":[{"fromBlock":"' + fromBlock + '", \
-    "toBlock":"' + toBlock + '"}], \
-    "id":' + batchNum + '}';
+    "params":[{"fromBlock":"' + fromBlock + '"}], \
+    "id":' + id + '}';
 
   var post_options = {
       host: 'localhost',
@@ -85,6 +90,7 @@ function grabInternalTxs(batchNum, batchSize) {
   };
 
   var post_req = http.request(post_options, function(res) {
+
       res.setEncoding('utf8');
       var data;
       res.on('data', function (chunk) {
@@ -98,14 +104,14 @@ function grabInternalTxs(batchNum, batchSize) {
             console.error(e);
             if (batchSize > 1) {
                 for (var b=0; b<batchSize; b++) {
-                    grabInternalTxs(batchNum+b, 1);
+                    grabInternalTxs(web3, batchNum+b, 1);
                 }
             } else {
                 console.error(post_data);
             }
             return
         }
-          console.log(data);
+          console.log("\n Here comes itx: " + data);
           for (d in jdata.result) {
             var j = jdata.result[d];
             if (j.action.call)
@@ -134,7 +140,7 @@ function grabInternalTxs(batchNum, batchSize) {
           }
       });
   });
-
+  console.log(post_data);
   post_req.write(post_data);
   post_req.end();
 
@@ -198,7 +204,7 @@ var grabBlock = function(config, web3, blockHashOrNumber) {
                 }
                 else {
                     getTx(web3, blockHashOrNumber);
-                    grabInternalTxs(blockHashOrNumber,1);
+                    grabInternalTxs(web3, desiredBlockHashOrNumber);
                     writeBlockToDB(config, blockData);
                 }
                 if('listenOnly' in config && config.listenOnly === true)
