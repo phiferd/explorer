@@ -1,16 +1,16 @@
 div.page-logo {overflow: visible;}
 img.logo-default {
-    max-height: 150px;
-    height: 100px;
+    max-height: 100px;
+    height: 60px;
 }
 .truncate-txhash, .truncate-addrhash{
-    white-space:nowrap; 
+    white-space:nowrap;
     overflow:hidden;
     text-overflow: ellipsis;
     max-width:220px;
 }
 .truncate-addrhash {
-    max-width:200px;   
+    max-width:200px;
 }
 .scrollable {
     max-height: 400px;
@@ -19,7 +19,7 @@ img.logo-default {
 }
 #table_txs td, #table_internal_txs td {
     font-size: 12px;
-    white-space:nowrap; 
+    white-space:nowrap;
     overflow:hidden;
     text-overflow: ellipsis;
 }
@@ -52,7 +52,7 @@ img.logo-default {
 }
 .home-tx{
     font-size: 12px;
-    white-space:nowrap; 
+    white-space:nowrap;
     overflow:hidden;
     text-overflow: ellipsis;
 }
@@ -80,7 +80,7 @@ pre {
     word-wrap: break-word;
 }
 pre.code-js, .verified{
-    max-height: 200px; 
+    max-height: 200px;
 }
 .code {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
