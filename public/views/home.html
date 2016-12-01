@@ -23,13 +23,13 @@
                      <div ng-repeat="t in latest_txs track by $index" class="todo-tasklist-item item-border-green row" ng-class="(t.extraData.indexOf('Parity') > -1) ? 'item-border-red': '';(t.extraData.indexOf('Pool') > -1) ? 'item-border-blue': ''">
                          <!--TODO: color by known miners -->
                          <div class="col-sm-5">
-                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/pppicon.png" alt="{{t.hash}}"></a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
+                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/pppicon.png" alt="{{t.hash}}"> Playback</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
                              <span class="todo-tasklist-date">
                                  <i class="fa fa-hourglass-o"></i>{{t.timestamp | timeDuration }} ago</span>
                          </div>
                          <div class="todo-tasklist-controls col-sm-7">
                              <div class="todo-tasklist-item-text"><span class="todo-tasklist-item-text"><a href="/addr/{{t.to}}">{{t.to.substr(0,24)}}...</a></span>
-                             <br>played by <a href="/addr/{{t.from}}">{{t.from.substr(0,24)}}...</a><br>
+                             <br> by <a href="/addr/{{t.from}}">{{t.from.substr(0,24)}}...</a><br>
                              {{t.value}} coin paid.
                              </div>
                          </div>

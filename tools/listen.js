@@ -71,7 +71,6 @@ var getTx = function(web3,desiredBlockHashOrNumber) {
 
 function grabInternalTxs(web3, blockHashOrNumber) {
 
-  console.log("\n Here comeing itx : ");
   var fromBlock = web3.toHex(web3.eth.getBlock(blockHashOrNumber).number);
   var toBlock = fromBlock;
   var id = web3.eth.getBlock(blockHashOrNumber).number;
