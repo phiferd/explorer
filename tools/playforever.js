@@ -14,13 +14,13 @@ function delay(ms) {
     });
 }
 
-var playForever = function() {
+var payForever = function() {
     var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
     Promise.resolve()
         .then(() => payToppest(web3))
         .then(() => delay(10000))
-        .then(() => console.log(playForever()))
+        .then(() => payForever())
         .catch((err) => {console.log(err)});
 }
 
@@ -40,8 +40,10 @@ var payToppest=function(web3){
                function(err, transactionHash){
                    if(err){
                        reject(err);
+                       console.log(err);
                    }else{
                        resolve(transactionHash);
+                       console.log(transactionHash);
                    }
                }
            );
@@ -50,4 +52,4 @@ var payToppest=function(web3){
 }
 
 
-playForever();
+payForever();
