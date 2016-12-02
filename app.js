@@ -7,6 +7,11 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
+var Musicoin = require('Musicoin-core');
+var musicoinCore = new Musicoin({
+  web3Host: 'http://localhost:8545',
+  ipfsHost: 'http://localhost:8080'
+});
 
 var app = express();
 app.set('port', process.env.PORT || 3000);
@@ -20,6 +25,18 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/resource/:address', function(req, res) {
+  musicoinCore.getLicenseModule().getResourceStream(req.params.address)
+    .then(function (result) {
+      res.writeHead(200, result.headers);
+      result.stream.pipe(res);
+    })
+    .catch(function (err) {
+      res.status(500)
+      res.send(err);
+    });
+});
 
 // app libraries
 global.__lib = __dirname + '/lib/';
