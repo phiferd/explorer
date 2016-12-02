@@ -48,7 +48,8 @@ var Transaction = new Schema(
     "gas": Number,
     "gasPrice": String,
     "timestamp": Number,
-    "input": String
+    "input": String,
+    "type":String
 });
 
 mongoose.model('Block', Block);

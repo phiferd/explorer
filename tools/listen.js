@@ -51,6 +51,7 @@ var getTx = function(web3,desiredBlockHashOrNumber) {
         var d =0;
         for (;d <web3.eth.getBlockTransactionCount(desiredBlockHashOrNumber);d++) {
               var txData = web3.eth.getTransactionFromBlock(desiredBlockHashOrNumber,d);
+              txData.type = "play";   
               txData.timestamp = web3.eth.getBlock(desiredBlockHashOrNumber).timestamp;
               new Transaction(txData).save();
               if ( typeof err !== 'undefined' && err ) {

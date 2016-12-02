@@ -92,7 +92,7 @@ var getTx = function(req, res){
   var tx = req.body.tx.toLowerCase();
   console.log("findinging: " +tx)
 
-  var txFind = Transaction.findOne( { "hash" : tx }, "hash value blockNumber timestamp gas gasPrice input nonce from to")
+  var txFind = Transaction.findOne( { "hash" : tx }, "hash value blockNumber timestamp gas gasPrice input nonce from to type")
                   .lean(true);
   txFind.exec(function (err, doc) {
     if (!doc){
@@ -103,7 +103,7 @@ var getTx = function(req, res){
       // filter transactions
       //var txDocs = filters.filterBlock(doc, "hash", tx)
       doc.value = filters.calEth(doc.value);
-      console.log("result" + JSON.stringify(doc));
+      console.log("Here it is: " + JSON.stringify(doc));
       res.write(JSON.stringify(doc));
       res.end();
     }
@@ -218,7 +218,7 @@ var sendBlocks = function(lim, res) {
 }
 
 var sendTxs = function(lim, res) {
-  Transaction.find({}, "hash value blockNumber timestamp gas gasPrice input nonce from to").lean(true).sort('-blockNumber').limit(lim)
+  Transaction.find({}, "hash value blockNumber timestamp gas gasPrice input nonce from to type").lean(true).sort('-blockNumber').limit(lim)
         .exec(function (err, txs) {
           res.write(JSON.stringify({"txs":  filters.filterTX2(txs)}));
           //res.write(JSON.stringify({"txs":  txs}));

@@ -23,7 +23,7 @@
                      <div ng-repeat="t in latest_txs track by $index" class="todo-tasklist-item item-border-green row" ng-class="(t.extraData.indexOf('Parity') > -1) ? 'item-border-red': '';(t.extraData.indexOf('Pool') > -1) ? 'item-border-blue': ''">
                          <!--TODO: color by known miners -->
                          <div class="col-sm-5">
-                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/pppicon.png" alt="{{t.hash}}"> Playback</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
+                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/types/{{t.type}}.png" alt="{{t.hash}}"> {{t.type}}</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
                              <span class="todo-tasklist-date">
                                  <i class="fa fa-hourglass-o"></i>{{t.timestamp | timeDuration }} ago</span>
                          </div>
