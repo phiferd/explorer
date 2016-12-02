@@ -56,7 +56,7 @@ module.exports = function(app){
   });
 
   app.get('/ipfs/:hash', function(req, res) {
-    musicoinCore.getMediaProvier().getRawIpfsResource(req.params.hash)
+    musicoinCore.getMediaProvider().getRawIpfsResource(req.params.hash)
       .then(function (result) {
         res.writeHead(200, result.headers);
         result.stream.pipe(res);
@@ -259,6 +259,10 @@ var sendTxs = function(lim, res) {
                  tx.details = results[i];
                  if (tx.details.license) {
                    tx.details.license.playableUrl = "/resource/" + tx.details.license.address;
+                   tx.image = tx.details.license.image;
+                 }
+                 if (tx.details.artistProfile && !tx.image) {
+                   tx.image = tx.details.artistProfile.image;
                  }
                });
               res.write(JSON.stringify({"txs":  filtered}));
