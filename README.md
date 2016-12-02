@@ -1,4 +1,4 @@
-npm ins# ETCExplorer 
+# ETCExplorer 
 
 <b>Live Version: [etherhub.io](http://etherhub.io)</b>
 

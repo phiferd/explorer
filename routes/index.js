@@ -4,7 +4,13 @@ var Block     = mongoose.model( 'Block' );
 var InternalTx     = mongoose.model( 'InternalTransaction' );
 var Transaction     = mongoose.model( 'Transaction' );
 
-var filters = require('./filters')
+var filters = require('./filters');
+
+var Musicoin = require('Musicoin-core');
+var musicoinCore = new Musicoin({
+  web3Host: 'http://localhost:8545',
+  ipfsHost: 'http://localhost:8080'
+});
 
 
 var async = require('async');
@@ -37,7 +43,29 @@ module.exports = function(app){
   app.post('/fiat', fiat);
   app.post('/stats', stats);
 
+  app.get('/resource/:address', function(req, res) {
+    musicoinCore.getLicenseModule().getResourceStream(req.params.address)
+      .then(function (result) {
+        res.writeHead(200, result.headers);
+        result.stream.pipe(res);
+      })
+      .catch(function (err) {
+        res.status(500)
+        res.send(err);
+      });
+  });
 
+  app.get('/ipfs/:hash', function(req, res) {
+    musicoinCore.getMediaProvier().getRawIpfsResource(req.params.hash)
+      .then(function (result) {
+        res.writeHead(200, result.headers);
+        result.stream.pipe(res);
+      })
+      .catch(function (err) {
+        res.status(500)
+        res.send(err);
+      });
+  });
 }
 
 var getAddr = function(req, res){
@@ -220,9 +248,28 @@ var sendBlocks = function(lim, res) {
 var sendTxs = function(lim, res) {
   Transaction.find({}, "hash value blockNumber timestamp gas gasPrice input nonce from to type").lean(true).sort('-blockNumber').limit(lim)
         .exec(function (err, txs) {
-          res.write(JSON.stringify({"txs":  filters.filterTX2(txs)}));
-          //res.write(JSON.stringify({"txs":  txs}));
-          res.end();
+          var filtered = filters.filterTX2(txs);
+          var promises = [];
+          filtered.map(function(tx) {
+            promises.push(musicoinCore.getTransactionDetails(tx.hash));
+          })
+          Promise.all(promises)
+            .then(function(results) {
+               filtered.forEach(function(tx, i) {
+                 tx.details = results[i];
+                 if (tx.details.license) {
+                   tx.details.license.playableUrl = "/resource/" + tx.details.license.address;
+                 }
+               });
+              res.write(JSON.stringify({"txs":  filtered}));
+              res.end();
+            })
+            .catch(function(err) {
+              res.status(500);
+              res.write(JSON.stringify(err));
+              res.end();
+              console.log(err);
+            })
         });
 }
 

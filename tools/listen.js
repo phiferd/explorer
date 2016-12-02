@@ -203,7 +203,7 @@ var grabBlock = function(config, web3, blockHashOrNumber) {
                     checkBlockDBExistsThenWrite(config, blockData);
                 }
                 else {
-                    getTx(web3, blockHashOrNumber);
+                    getTx(web3, desiredBlockHashOrNumber);
                     grabInternalTxs(web3, desiredBlockHashOrNumber);
                     writeBlockToDB(config, blockData);
                 }

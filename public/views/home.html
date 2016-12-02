@@ -23,13 +23,15 @@
                      <div ng-repeat="t in latest_txs track by $index" class="todo-tasklist-item item-border-green row" ng-class="(t.extraData.indexOf('Parity') > -1) ? 'item-border-red': '';(t.extraData.indexOf('Pool') > -1) ? 'item-border-blue': ''">
                          <!--TODO: color by known miners -->
                          <div class="col-sm-5">
-                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/types/{{t.type}}.png" alt="{{t.hash}}"> {{t.type}}</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
+                             <!--<audio src="{{t.details.license.playableUrl}}" controls></audio>-->
+                             <img width=64px src="{{t.details.artistProfile.image}}">
+                             <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/types/{{t.details.eventType}}.png" alt="{{t.hash}}"> {{t.details.eventType}}</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
                              <span class="todo-tasklist-date">
                                  <i class="fa fa-hourglass-o"></i>{{t.timestamp | timeDuration }} ago</span>
                          </div>
                          <div class="todo-tasklist-controls col-sm-7">
-                             <div class="todo-tasklist-item-text"><span class="todo-tasklist-item-text"><a href="/addr/{{t.to}}">{{t.to.substr(0,24)}}...</a></span>
-                             <br> by <a href="/addr/{{t.from}}">{{t.from.substr(0,24)}}...</a><br>
+                             <div class="todo-tasklist-item-text"><span class="todo-tasklist-item-text"><a href="/addr/{{t.to}}">{{t.details.license.title}} by {{t.details.license.artist}}</a></span>
+                             <br> from <a href="/addr/{{t.from}}">{{t.from.substr(0,24)}}...</a><br>
                              {{t.value}} coin paid.
                              </div>
                          </div>
