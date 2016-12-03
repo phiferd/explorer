@@ -6,6 +6,8 @@ var Transaction     = mongoose.model( 'Transaction' );
 
 var filters = require('./filters');
 
+// TODO: Move these settings to a config file
+var samplePercentage = 50;
 var Musicoin = require('Musicoin-core');
 var musicoinCore = new Musicoin({
   web3Host: 'http://localhost:8545',
@@ -43,8 +45,8 @@ module.exports = function(app){
   app.post('/fiat', fiat);
   app.post('/stats', stats);
 
-  app.get('/resource/:address', function(req, res) {
-    musicoinCore.getLicenseModule().getResourceStream(req.params.address)
+  app.get('/sample/:address', function(req, res) {
+    musicoinCore.getLicenseModule().sampleResourceStream(req.params.address, samplePercentage)
       .then(function (result) {
         res.writeHead(200, result.headers);
         result.stream.pipe(res);
@@ -251,14 +253,18 @@ var sendTxs = function(lim, res) {
           var filtered = filters.filterTX2(txs);
           var promises = [];
           filtered.map(function(tx) {
-            promises.push(musicoinCore.getTransactionDetails(tx.hash));
+            promises.push(
+              musicoinCore.getTransactionDetails(tx.hash)
+              .catch(function(err) {
+                return {};
+              }));
           })
           Promise.all(promises)
             .then(function(results) {
                filtered.forEach(function(tx, i) {
                  tx.details = results[i];
                  if (tx.details.license) {
-                   tx.details.license.playableUrl = "/resource/" + tx.details.license.address;
+                   tx.details.license.playableUrl = "/sample/" + tx.details.license.address;
                    tx.image = tx.details.license.image;
                  }
                  if (tx.details.artistProfile && !tx.image) {

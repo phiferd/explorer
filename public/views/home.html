@@ -1,7 +1,7 @@
 <div class="row">
 
 </div>
-
+<audio id="audioPlayer" controls autoplay></audio>
 <div class="row">
   <div class="col-md-6 col-sm-6">
          <!-- BEGIN PORTLET-->
@@ -23,7 +23,6 @@
                      <div ng-repeat="t in latest_txs track by $index" class="todo-tasklist-item item-border-green row" ng-class="(t.extraData.indexOf('Parity') > -1) ? 'item-border-red': '';(t.extraData.indexOf('Pool') > -1) ? 'item-border-blue': ''">
                          <!--TODO: color by known miners -->
                          <div class="col-sm-5">
-                             <!--<audio src="{{t.details.license.playableUrl}}" controls></audio>-->
                              <img width=64px src="{{t.image}}">
                              <span class="todo-tasklist-item-title"><a href="/tx/{{t.hash}}" class="primary-link"><img src="/img/types/{{t.details.eventType}}.png" alt="{{t.hash}}"> {{t.details.eventType}}</a><a href="/block/{{t.number}}">{{t.number}}</a></span><br>
                              <span class="todo-tasklist-date">
@@ -34,6 +33,7 @@
                              <br> from <a href="/addr/{{t.from}}">{{t.from.substr(0,24)}}...</a><br>
                              {{t.value}} coin paid.
                              </div>
+                             <a onclick='playItem()' license="{{t.details.license.playableUrl}}">sample</a>
                          </div>
                      </div>
                  </div>
