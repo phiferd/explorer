@@ -247,41 +247,40 @@ var sendBlocks = function(lim, res) {
   });
 }
 
-var sendTxs = function(lim, res) {
+var sendTxs = function (lim, res) {
   Transaction.find({}, "hash value blockNumber timestamp gas gasPrice input nonce from to type").lean(true).sort('-blockNumber').limit(lim)
-        .exec(function (err, txs) {
-          var filtered = filters.filterTX2(txs);
-          var promises = [];
-          filtered.map(function(tx) {
-            promises.push(
-              musicoinCore.getTransactionDetails(tx.hash)
-              .catch(function(err) {
-                return {};
-              }));
+    .exec(function (err, txs) {
+      var filtered = filters.filterTX2(txs);
+      var promises = filtered.map(function (tx) {
+        return musicoinCore.getTransactionDetails(tx.hash)
+          .catch(function (err) {
+            console.log("Could not find details for transaction: " + tx.hash + ": " + err);
+            return {err: err};
           })
-          Promise.all(promises)
-            .then(function(results) {
-               filtered.forEach(function(tx, i) {
-                 tx.details = results[i];
-                 if (tx.details.license) {
-                   tx.details.license.playableUrl = "/sample/" + tx.details.license.address;
-                   tx.image = tx.details.license.image;
-                 }
-                 if (tx.details.artistProfile && !tx.image) {
-                   tx.image = tx.details.artistProfile.image;
-                 }
-               });
-              res.write(JSON.stringify({"txs":  filtered}));
-              res.end();
-            })
-            .catch(function(err) {
-              res.status(500);
-              res.write(JSON.stringify(err));
-              res.end();
-              console.log(err);
-            })
-        });
-}
+      });
+      Promise.all(promises)
+        .then(function (results) {
+          filtered.forEach(function (tx, i) {
+            tx.details = results[i];
+            if (tx.details.license) {
+              tx.details.license.playableUrl = "/sample/" + tx.details.license.address;
+              tx.image = tx.details.license.image;
+            }
+            if (tx.details.artistProfile && !tx.image) {
+              tx.image = tx.details.artistProfile.image;
+            }
+          });
+          res.write(JSON.stringify({"txs": filtered}));
+          res.end();
+        })
+        .catch(function (err) {
+          res.status(500);
+          res.write(JSON.stringify(err));
+          res.end();
+          console.log(err);
+        })
+    });
+};
 
 const MAX_ENTRIES = 10;
 
